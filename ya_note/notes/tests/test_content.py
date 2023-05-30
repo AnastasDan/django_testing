@@ -6,6 +6,10 @@ from notes.models import Note
 
 User = get_user_model()
 
+NOTES_ADD_URL = 'notes:add'
+NOTES_EDIT_URL = 'notes:edit'
+NOTES_LIST_URL = 'notes:list'
+
 
 class TestContent(TestCase):
     @classmethod
@@ -24,20 +28,19 @@ class TestContent(TestCase):
         )
 
     def test_notes_list_for_different_users(self):
-        response = self.author_client.get(reverse('notes:list'))
-        object_list = response.context['object_list']
-        self.assertIn(self.note, object_list)
+        response = self.author_client.get(reverse(NOTES_LIST_URL))
+        notes = response.context['object_list']
+        self.assertIn(self.note, notes)
 
     def test_note_not_in_list_for_another_user(self):
-        url = reverse('notes:list')
-        response = self.reader_client.get(url)
-        object_list = response.context['object_list']
-        self.assertNotIn(self.note, object_list)
+        response = self.reader_client.get(reverse(NOTES_LIST_URL))
+        notes = response.context['object_list']
+        self.assertNotIn(self.note, notes)
 
     def test_create_edit_note_page_contains_form(self):
         urls = (
-            ('notes:add', None),
-            ('notes:edit', (self.note.slug,)),
+            (NOTES_ADD_URL, None),
+            (NOTES_EDIT_URL, (self.note.slug,)),
         )
         for name, args in urls:
             with self.subTest(name=name):
